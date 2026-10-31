@@ -1,0 +1,8 @@
+/target
+/dist
+.idea/
+.vscode/
+wix/bin/
+wix/obj/
+__pycache__/
+*.pyc

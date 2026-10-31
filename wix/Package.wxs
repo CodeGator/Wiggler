@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="Wiggler"
+           Manufacturer="CodeGator"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="07635988-AF1F-4DEA-98AD-DB29CE10A4AA"
+           Language="1033"
+           Scope="perMachine">
+    <SummaryInformation Description="Nudge the mouse so Windows stays active." />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Wiggler is already installed."
+                  Schedule="afterInstallInitialize" />
+    <MediaTemplate EmbedCab="yes" />
+    <Icon Id="WigglerIcon" SourceFile="..\assets\wiggler.ico" />
+    <Property Id="ARPPRODUCTICON" Value="WigglerIcon" />
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable" />
+    <Binary Id="WigglerQuitExe" SourceFile="..\target\release\wiggler.exe" />
+    <CustomAction Id="QuitWiggler"
+                  BinaryRef="WigglerQuitExe"
+                  ExeCommand="--quit"
+                  Execute="immediate"
+                  Return="ignore"
+                  Impersonate="yes" />
+    <InstallUISequence>
+      <Custom Action="QuitWiggler" After="CostFinalize" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="QuitWiggler" Before="InstallValidate" />
+    </InstallExecuteSequence>
+    <Feature Id="Main" Title="Wiggler" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+    <ui:WixUI Id="WixUI_Minimal" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+  </Package>
+
+  <Fragment>
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="CompanyFolder" Name="CodeGator">
+        <Directory Id="INSTALLFOLDER" Name="Wiggler" />
+      </Directory>
+    </StandardDirectory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Component Id="WigglerExe">
+        <File Id="WigglerExeFile" Source="..\target\release\wiggler.exe" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="StartMenuDir" Name="Wiggler">
+        <Component Id="StartMenuShortcut">
+          <Shortcut Id="WigglerStartMenu"
+                    Name="Wiggler"
+                    Description="Nudge the mouse so Windows stays active."
+                    Target="[INSTALLFOLDER]wiggler.exe"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="WigglerIcon" />
+          <RemoveFolder Id="StartMenuDir" On="uninstall" />
+          <RegistryValue Root="HKCU"
+                         Key="Software\CodeGator\Wiggler"
+                         Name="StartMenu"
+                         Type="integer"
+                         Value="1"
+                         KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+  </Fragment>
+</Wix>
